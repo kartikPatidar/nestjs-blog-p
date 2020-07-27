@@ -23,6 +23,7 @@ export class UserService {
                 newUser.username = user.username;
                 newUser.email = user.email;
                 newUser.password = passwordHash;
+                newUser.role = user.role;
 
                 return from(this.userRepository.save(newUser)).pipe(
                     map((user: User) => {
@@ -39,6 +40,9 @@ export class UserService {
     getUser(id: number): Observable<User> {
         return from(this.userRepository.findOne({id})).pipe(
             map((user: User) => {
+                if(!user) {
+                    throw new NotFoundException();
+                }
                 const { password, ...result } = user;
                 return result;
             })
@@ -62,6 +66,10 @@ export class UserService {
     updateUser(id: number, user: User): Observable<any> {
         delete user.password;
         delete user.email;
+        return from(this.userRepository.update(id, user));
+    }
+
+    updateRoleOfUser(id: number, user: User): Observable<any> {
         return from(this.userRepository.update(id, user));
     }
 
